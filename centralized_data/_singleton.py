@@ -48,6 +48,17 @@ class Singleton(ABC):
     def ready(self) -> bool:
         return hasattr(self, '_initialized') and self._initialized
 
+    @classmethod
+    def get_instance(cl, base_class: Type[T]) -> Self:
+        """
+            Use this method to fetch a singleton of a 3rd-Party type that you know you're only going to override once.
+
+            ## Example
+            Your project has your own HTTP Server implementation, but you need to access the base class' method in a
+            separate unit, which doesn't need to necesserily create potential circular references.
+        """
+        return next(iter([obj for instance_class, obj in Singleton._singletons.items() if issubclass(instance_class, base_class)]))
+
 class GlobalCollection[G](Singleton):
     """
         Global Collection support for a class.

@@ -1,9 +1,11 @@
 from typing import override
 import unittest
 
-from centralized_data import Bindable, GlobalCollection
+from centralized_data import Bindable, GlobalCollection, Singleton
 
-class BindableT(Bindable):
+class SomeOtherType: ...
+
+class BindableT(Bindable, SomeOtherType):
     def constructor(self, *a, **kw) -> None:
         super().constructor()
         self.some_value = kw.get('some_value')
@@ -22,6 +24,7 @@ class TestBindable(unittest.TestCase):
         self.assertEqual(BindableT(some_value=3).some_value, BindableT(some_value=4).some_value, 'Constructors are called multiple times.')
         BindableT().some_value = 4
         self.assertEqual(BindableT().some_value, 4, 'Value has not changed changed.')
+        self.assertEqual(Singleton.get_instance(SomeOtherType), BindableT(), 'get_instance')
 
     def test_binding(self):
         obj = TestObject()
