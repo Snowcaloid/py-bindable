@@ -1,6 +1,7 @@
+from typing import override
 import unittest
 
-from src.bindable import Bindable
+from centralized_data import Bindable, GlobalCollection
 
 class BindableT(Bindable):
     def constructor(self, *a, **kw) -> None:
@@ -28,6 +29,34 @@ class TestBindable(unittest.TestCase):
         BindableT().some_value = 1
         self.assertEqual(obj.testbinding.some_value, 1, 'Access to value from binding')
         self.assertEqual(obj.testbinding.method(), 'Success!', 'Access to binding from method')
+
+class GlobalCollectionT(GlobalCollection[int]):
+    @override
+    def constructor(self, key: int = None) -> None:
+        super().constructor(key)
+        self.some_property = 'testing ' + str(key or 0)
+
+class TestGlobalCollection(unittest.TestCase):
+    def test_elements(self):
+        GlobalCollectionT.clear()
+        self.assertEqual(GlobalCollectionT(1).some_property, 'testing 1')
+        self.assertEqual(GlobalCollectionT(2).some_property, 'testing 2')
+        self.assertEqual(GlobalCollectionT(3).some_property, 'testing 3')
+        GlobalCollectionT(3).some_property = 'changed'
+        self.assertEqual(GlobalCollectionT(3).some_property, 'changed')
+        self.assertEqual(GlobalCollectionT().some_property, 'testing 0')
+
+    def test_clear(self):
+        GlobalCollectionT(10)
+        GlobalCollectionT(11)
+        GlobalCollectionT.clear()
+        self.assertEqual(GlobalCollectionT.count(), 0)
+
+    def test_pop(self):
+        GlobalCollectionT.clear()
+        GlobalCollectionT(1).some_property = 'something'
+        GlobalCollectionT(1).pop()
+        self.assertEqual(GlobalCollectionT.count(), 0)
 
 if __name__ == "__main__":
     unittest.main()
