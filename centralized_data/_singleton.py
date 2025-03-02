@@ -1,6 +1,6 @@
 from __future__ import annotations
 from abc import ABC
-from typing import Callable, Dict, Self, Type, TypeVar, override
+from typing import Callable, Dict, List, Self, Type, TypeVar, override
 
 class Singleton(ABC):
     """
@@ -10,6 +10,7 @@ class Singleton(ABC):
         Never forget to call `super().constructor()` in the derived classes.
     """
     _singletons: Dict[Type[Singleton], Singleton] = {}
+    _initialized: List[Singleton] = []
 
     @classmethod
     def _new_instance(cls) -> Self:
@@ -34,9 +35,9 @@ class Singleton(ABC):
             Calls the constructor and passes all arguments only the first
             time when the object is initialized.
         """
-        if not hasattr(self, '_initialized'):
+        if not self.ready:
             self.constructor(*args, **kwargs)
-            self._initialized = True
+            Singleton._initialized.append(self)
 
     def constructor(self) -> None:
         """
@@ -46,7 +47,7 @@ class Singleton(ABC):
 
     @property
     def ready(self) -> bool:
-        return hasattr(self, '_initialized') and self._initialized
+        return self in Singleton._initialized
 
     @classmethod
     def get_instance(cl, base_class: Type[T]) -> Self:
@@ -84,9 +85,9 @@ class GlobalCollection[G](Singleton):
             Calls the constructor and passes all arguments only the first
             time when the object is initialized.
         """
-        if not hasattr(self, '_initialized'):
+        if not self.ready:
             self.constructor(key, *args, **kwargs)
-            self._initialized = True
+            self._initialized.append(self)
 
     def constructor(self, key: G = None) -> None:
         """
