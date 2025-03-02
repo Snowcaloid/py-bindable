@@ -36,8 +36,8 @@ class Singleton(ABC):
             time when the object is initialized.
         """
         if not self.ready:
-            self.constructor(*args, **kwargs)
             Singleton._initialized.append(self)
+            self.constructor(*args, **kwargs)
 
     def constructor(self) -> None:
         """
